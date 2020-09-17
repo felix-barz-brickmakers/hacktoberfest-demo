@@ -1,0 +1,45 @@
+name: Continous Integration
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        node-version:
+          - 10
+          - 12
+          - 14
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: setup-node-${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+          check-latest: true
+          registry-url: "https://npm.pkg.github.com"
+      - uses: actions/checkout@v2
+      - name: cache node_modules
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: "node_modules"
+          key: node_modules-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
+      - run: yarn install
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+      - run: yarn lint
+      - run: yarn build
+      - run: yarn test
