@@ -2,7 +2,7 @@ import { seed, next } from "../rng";
 
 describe("rng.js", () => {
   test("next produces RNG sequence", () => {
-    seed(42);
+    seed(0.42);
     expect(next()).toBe(181739644);
     expect(next()).toBe(694639264);
     expect(next()).toBe(1766491179);
